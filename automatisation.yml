@@ -1,1 +1,53 @@
+name: Hack Ultimate PyPI Video
+on:
+  workflow_dispatch: # Ton bouton unique en 1 clic
 
+jobs:
+  generateur-flash:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ouvrir les fichiers
+        uses: actions/checkout@v4
+
+      - name: Activer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      # ICI : GitHub va piocher instantanément dans la plus grande base de ressources (PyPI)
+      # On installe le monteur vidéo (moviepy) et la voix off (gTTS) en 2 secondes
+      - name: Telecharger les ressources pretes a l'emploi
+        run: |
+          pip install gTTS moviepy pillow
+
+      # Ce script utilise les ressources prêtes à l'emploi pour fabriquer le Short
+      - name: Executer le montage automatique
+        run: |
+          cat << 'EOF' > robot_pypi.py
+          import urllib.request
+          from gtts import gTTS
+          from PIL import Image, ImageDraw
+
+          print("1. Generation de la voix off gratuite...")
+          texte = "Le savais-tu ? L'espace est totalement silencieux car le son ne voyage pas dans le vide."
+          gTTS(text=texte, lang='fr').save("audio.mp3")
+
+          print("2. Creation du visuel vertical Short (1080x1920)...")
+          img = Image.new('RGB', (1080, 1920), color = (20, 20, 35))
+          d = ImageDraw.Draw(img)
+          img.save("fond.png")
+
+          print("3. Fusion magique par ligne de commande...")
+          # Utilisation de la puissance brute de la machine pour lier le son et l'image
+          import os
+          os.system("ffmpeg -loop 1 -i fond.png -i audio.mp3 -c:v libx264 -c:a aac -b:a 192k -pix_fmt yuv420p -shortest video_pret_a_poster.mp4")
+          print("Video construite avec succes et prete a l'emploi !")
+          EOF
+          python robot_pypi.py
+
+      # Récupère ton fichier MP4 directement sur ton écran
+      - name: Livrer le fichier MP4 final
+        uses: actions/upload-artifact@v4
+        with:
+          name: MonShortDuJour
+          path: video_pret_a_poster.mp4
