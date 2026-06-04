@@ -1,47 +1,26 @@
-name: Hack Ultimate PyPI Video
+name: RobotMonetisation
 
-on:
-  workflow_dispatch:
+on: [workflow_dispatch]
 
 jobs:
-  generateur-flash:
+  run-robot:
     runs-on: ubuntu-latest
     steps:
-      - name: Ouvrir les fichiers
+      - name: Recuperer Fichiers
         uses: actions/checkout@v4
 
-      - name: Activer Python
+      - name: Configurer Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
-      - name: Telecharger les ressources pretes a l'emploi
-        run: pip install gTTS pillow
-
-      - name: Executer le montage automatique
+      - name: Lancer Machine Audio
         run: |
-          cat << 'EOF' > robot_pypi.py
-          from gtts import gTTS
-          from PIL import Image, ImageDraw
+          pip install gTTS
+          python -c "from gtts import gTTS; gTTS('Abonne-toi pour découvrir le secret', lang='fr').save('short.mp3')"
 
-          print("1. Generation de la voix off gratuite...")
-          texte = "Le savais-tu ? L'espace est totalement silencieux car le son ne voyage pas dans le vide."
-          gTTS(text=texte, lang='fr').save("audio.mp3")
-
-          print("2. Creation du visuel vertical Short (1080x1920)...")
-          img = Image.new('RGB', (1080, 1920), color = (20, 20, 35))
-          img.save("fond.png")
-
-          print("3. Fusion magique par ligne de commande...")
-          import os
-          os.system("ffmpeg -loop 1 -i fond.png -i audio.mp3 -c:v libx264 -c:a aac -b:a 192k -pix_fmt yuv420p -shortest video_pret_a_poster.mp4")
-          print("Video construite avec succes !")
-          EOF
-          python robot_pypi.py
-
-      convert-artifact:
-        name: Livrer le fichier MP4 final
+      - name: Telecharger Le Resultat
         uses: actions/upload-artifact@v4
         with:
-          name: MonShortDuJour
-          path: video_pret_a_poster.mp4
+          name: AudioPret
+          path: short.mp3
